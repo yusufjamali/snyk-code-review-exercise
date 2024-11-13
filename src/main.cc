@@ -17,7 +17,5 @@ int main(int argc, char* argv[]) {
   model::to_json(j, package);
   std::cout << j.dump(2) << std::endl;
 
-  std::cout << util::max_satisfying(std::vector<std::string>{"1.1.1", "4.4.4", "5.5.5"}, "^1.1.1")  << std::endl;
-
   return 0;
 }

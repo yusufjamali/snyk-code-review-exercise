@@ -35,7 +35,7 @@ You can run the tests with:
 
 ```sh
 cmake --build .build
-./.build/test
+./.build/tests
 ```
 
 Occasionally you might want to consider cleaning up:
