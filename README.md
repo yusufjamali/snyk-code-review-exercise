@@ -1,44 +1,42 @@
-# Snyk code review exercise
+# npm dependency cpp
 
-Hello there. You might have been asked to look at this repository and download it. You're currently on the `main` branch, and will need to work on a branch/pull request relavent to the interview you've been invited too.
+A cpp binary that provides a basic functions for querying the dependency
+tree of a [npm](https://npmjs.org) package.
 
-All exercises are based on the same ticket - [Ticket #5](https://github.com/snyk/snyk-code-review-exercise/issues/5).
+## Prerequisites
 
-We have several flavors of each exercise in different languages, each has a "main" branch with the current state of the application and a "feature" branch that contains changes we'd like you to review.
+- Python 3.10
+- gcc
+- cmake
+- poetry
+- conan
 
-**TypeScript Option 1**
+## Getting Started
 
-* [Pull Request #1](https://github.com/snyk/snyk-code-review-exercise/pull/1)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/typescript) (`typescript`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/transative-dependencies) (`typescript-recursive`)
+To install dependencies (choose the correct --profile:build under `conan_profiles/`):
 
+```sh
+poetry install
+conan install . --build=missing --profile:host=conan_profiles/gcc_17_linux --profile:build=conan_profiles/gcc_17_linux --output-folder=.build
+cmake -DCMAKE_TOOLCHAIN_FILE=.build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B .build .
+```
 
-**TypeScript Option 2**
+Now run the main program with
 
-* [Pull Request #8](https://github.com/snyk/snyk-code-review-exercise/pull/8)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/typescript) (`typescript`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/typescript-recursive-deps) (`typescript-recursive-deps`)
+```sh
+cmake --build .build
+./.build/main react 16.13.0
+```
 
-**Go**
+You can run the tests with:
 
-* [Pull Request #6](https://github.com/snyk/snyk-code-review-exercise/pull/6)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/golang) (`golang`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/golang-recursive-deps) (`golang-recursive-deps`)
+```sh
+cmake --build .build
+./.build/test
+```
 
-**Python**
+Occasionally you might want to consider cleaning up:
 
-* [Pull Request #9](https://github.com/snyk/snyk-code-review-exercise/pull/9)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/python) (`python`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/feat/python-recursive-deps) (`feat/python-recursive-deps`)
-
-**Python 1.0**
-
-* [Pull Request #15](https://github.com/snyk/snyk-code-review-exercise/pull/15)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/python-1.0) (`python-1.0`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/feat/python-transitive-deps) (`feat/python-transitive-deps`)
-
-**.NET**
-
-* [Pull Request #10](https://github.com/snyk/snyk-code-review-exercise/pull/10)
-* [Main Branch](https://github.com/snyk/snyk-code-review-exercise/tree/dotnet) (`dotnet`)
-* [Feature Branch](https://github.com/snyk/snyk-code-review-exercise/tree/feat/dotnet-recursive-deps) (`dotnet-recursive-deps`)
+```sh
+rm -R ./.build
+```
