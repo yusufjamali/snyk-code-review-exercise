@@ -5,11 +5,12 @@ tree of a [npm](https://npmjs.org) package.
 
 ## Prerequisites
 
-- Python 3.10
+- Python 3.10 or later
 - gcc
 - cmake
 - poetry
 - conan
+- numpy < 2.0.0 (Otherwise `conan install` fails for boost. e.g. `pip3 install "numpy<2.0" --break-system-package`)
 
 ## Getting Started
 
@@ -17,7 +18,9 @@ To install dependencies (choose the correct --profile:build under `conan_profile
 
 ```sh
 poetry install
-conan install . --build=missing --profile:host=conan_profiles/gcc_17_linux --profile:build=conan_profiles/gcc_17_linux --output-folder=.build
+conan install . --build=missing --profile:host=conan_profiles/gcc_linux_x86_64 --profile:build=conan_profiles/gcc_linux_x86_64 --output-folder=.build
+# Mac:
+# conan install . --build=missing --profile:host=conan_profiles/gcc_mac_arm --profile:build=conan_profiles/gcc_mac_arm --output-folder=.build
 cmake -DCMAKE_TOOLCHAIN_FILE=.build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B .build .
 ```
 

@@ -2,6 +2,7 @@
 #include "util.h"
 
 #include <string>
+#include <sstream>
 #include <nlohmann/json.hpp>
 
 namespace npm {
