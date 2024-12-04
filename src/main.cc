@@ -1,21 +1,34 @@
 #include "npm.h"
 #include "util.h"
 #include "model.h"
-
+#include <crow.h>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
-int main(int argc, char* argv[]) {
-  if(argc < 3) {
-    throw std::runtime_error("Error: Package name and version must be provided.");
-  }
+int main() {
+    crow::SimpleApp app;
 
-  model::VersionedPackage package = npm::get_versioned_package(argv[1], argv[2]);
+    CROW_ROUTE(app, "/package/<string>/<string>")
+        .methods(crow::HTTPMethod::GET)([](const crow::request&, crow::response& res, std::string package_name, std::string package_version) {
+            try {
+                model::VersionedPackage package = npm::get_versioned_package(package_name, package_version);
 
-  nlohmann::json j;
-  model::to_json(j, package);
-  std::cout << j.dump(2) << std::endl;
+                nlohmann::json j;
+                model::to_json(j, package);
 
-  return 0;
+                res.set_header("Content-Type", "application/json");
+                res.write(j.dump(2));
+                res.end();
+            } catch (const std::exception& e) {
+                res.code = 500;
+                res.write(std::string("Server Error: ") + e.what());
+                res.end();
+            }
+        });
+
+    app.port(3000).multithreaded().run();
+
+    return 0;
 }

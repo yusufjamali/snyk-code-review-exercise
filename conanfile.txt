@@ -2,6 +2,7 @@
 curlpp/0.8.1.cci.20240530
 nlohmann_json/3.11.3
 boost/1.86.0
+crowcpp-crow/1.2.0
 
 [options]
 boost/*:without_python=False

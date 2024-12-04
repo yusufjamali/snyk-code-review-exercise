@@ -5,7 +5,6 @@ description = ""
 authors = ["Snyk"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "snyk_code_review_exercise"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

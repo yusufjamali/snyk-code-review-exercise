@@ -1,6 +1,6 @@
 # npm dependency cpp
 
-A cpp binary that provides a basic functions for querying the dependency
+A cpp http server that provides a basic functions for querying the dependency
 tree of a [npm](https://npmjs.org) package.
 
 ## Prerequisites
@@ -24,11 +24,17 @@ conan install . --build=missing --profile:host=conan_profiles/gcc_linux_x86_64 -
 cmake -DCMAKE_TOOLCHAIN_FILE=.build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B .build .
 ```
 
-Now run the main program with
+Now run the server with
 
 ```sh
 cmake --build .build
-./.build/main react 16.13.0
+./.build/main
+```
+
+After server starts running, send request like
+
+```sh
+curl -s http://localhost:3000/package/react/16.13.0 | jq .
 ```
 
 You can run the tests with:

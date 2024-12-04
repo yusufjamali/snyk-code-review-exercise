@@ -8,6 +8,7 @@ find_package(curlpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
+find_package(Crow REQUIRED)
 
 set(CMAKE_SHARED_MODULE_PREFIX "")
 
@@ -39,7 +40,7 @@ target_compile_definitions(my_libs PRIVATE "PYTHONPATH=${PYTHONPATH}")
 target_compile_definitions(my_libs PRIVATE "POETRY_ENV_PATH=\"${PYTHONPATH}\"")
 
 add_executable(main src/main.cc)
-target_link_libraries(main PRIVATE my_libs  nlohmann_json::nlohmann_json)
+target_link_libraries(main PRIVATE my_libs  nlohmann_json::nlohmann_json Crow::Crow)
 
 # Test framework
 include(FetchContent)
