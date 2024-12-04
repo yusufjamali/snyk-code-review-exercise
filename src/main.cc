@@ -9,6 +9,7 @@
 
 int main() {
     crow::SimpleApp app;
+    app.loglevel(crow::LogLevel::Debug);
 
     CROW_ROUTE(app, "/package/<string>/<string>")
         .methods(crow::HTTPMethod::GET)([](const crow::request&, crow::response& res, std::string package_name, std::string package_version) {
@@ -28,7 +29,7 @@ int main() {
             }
         });
 
-    app.port(3000).multithreaded().run();
+    app.port(3000).run();
 
     return 0;
 }
