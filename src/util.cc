@@ -28,7 +28,7 @@ namespace util {
     try {
       Py_Initialize();
       object sys = import("sys");
-      sys.attr("path").attr("insert")(0, POETRY_ENV_PATH);
+      sys.attr("path").attr("append")(PYTHONPATH);
 
       list versions_py;
       for (const auto& version : versions) {

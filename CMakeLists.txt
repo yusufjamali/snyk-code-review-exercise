@@ -36,7 +36,7 @@ add_library(my_libs ${SOURCES})
 
 target_link_libraries(my_libs PRIVATE Boost::python curlpp::curlpp nlohmann_json::nlohmann_json Python3::Python)
 # Pass PYTHONPATH to targets to ensure they can use Python dependencies from Poetry
-target_compile_definitions(my_libs PRIVATE "PYTHONPATH=${PYTHONPATH}")
+target_compile_definitions(my_libs PRIVATE "PYTHONPATH=\"${PYTHONPATH}\"")
 target_compile_definitions(my_libs PRIVATE "POETRY_ENV_PATH=\"${PYTHONPATH}\"")
 
 add_executable(main src/main.cc)
