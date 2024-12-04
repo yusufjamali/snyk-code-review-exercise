@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(curlpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
 find_package(Crow REQUIRED)
 
@@ -25,8 +24,11 @@ if(NOT POETRY_ENV_PATH)
 endif()
 
 # Set PYTHONPATH to Poetry's site-packages for Python dependencies
-set(PYTHONPATH ${POETRY_ENV_PATH}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages)
 message(STATUS "Using PYTHONPATH from Poetry environment: ${PYTHONPATH}")
+set(POETRY_PYTHON_EXECUTABLE "${POETRY_ENV_PATH}/bin/python")
+set(Python3_EXECUTABLE "${POETRY_PYTHON_EXECUTABLE}")
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+set(PYTHONPATH ${POETRY_ENV_PATH}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)

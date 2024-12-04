@@ -5,7 +5,7 @@ tree of a [npm](https://npmjs.org) package.
 
 ## Prerequisites
 
-- Python 3.10 or later
+- Python (3.11 strongly preferred)
 - gcc
 - cmake
 - poetry
