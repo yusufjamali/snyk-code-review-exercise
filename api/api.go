@@ -39,7 +39,7 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 	pkgName := vars["package"]
 	pkgVersion := vars["version"]
 
-	// comment: should we consider validating the requested pkg version upfront ? this would help us fail
+	// review: should we consider validating the requested pkg version upfront ? this would help us fail
 	// early and free up resources for other requests at the earliest.
 	// consider returning 4xx error codes on any validation failures
 	// constraint, err := semver.NewConstraint(constraintStr)
@@ -47,7 +47,7 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 	//		return "", err
 	//	}
 
-	// minor comment: I wonder if we should explore the possibility of the recursive function not needing to
+	// minor review: I wonder if we should explore the possibility of the recursive function not needing to
 	// mutate a passed in object, (ie don't pass in &NpmPackageVersion but instead make it return it)
 	// imo it would be cleaner and prevent any accidental mutations ?
 	rootPkg := &NpmPackageVersion{Name: pkgName, Dependencies: map[string]*NpmPackageVersion{}}
@@ -57,7 +57,7 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// comment: should we use the json.Marshall function instead, it would reduce the payload size
+	// review: should we use the json.Marshall function instead, it would reduce the payload size
 	// and the amount of data being transmitted, improving e2e latency, the clients could then
 	// be responsible for formatting the response as desirable
 	stringified, err := json.MarshalIndent(rootPkg, "", "  ")
@@ -71,13 +71,13 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 
 	// Ignoring ResponseWriter errors
-	// comment: should we consider logging the error for observability ?
+	// review: should we consider logging the error for observability ?
 	// also if there is an error should we return a non 2xx ?
 	_, _ = w.Write(stringified)
 }
 
 func resolveDependencies(pkg *NpmPackageVersion, versionConstraint string) error {
-	// comment: should we abstract away the retrieval of the highest compatible version into another
+	// review: should we abstract away the retrieval of the highest compatible version into another
 	// function, it would reduce the cognitive load when trying to figure out what this function is
 	// doing ?
 	pkgMeta, err := fetchPackageMeta(pkg.Name)
@@ -90,7 +90,7 @@ func resolveDependencies(pkg *NpmPackageVersion, versionConstraint string) error
 	}
 	pkg.Version = concreteVersion
 
-	// comment: should we introduce an in memory cache that is keyed on name_version and stores the *NpmPackageVersion
+	// idea: should we introduce an in memory cache that is keyed on name_version and stores the *NpmPackageVersion
 	// object, this could reduce the redundant processing when building dependency calls.
 	// while the in-memory cache would have disadvantages like
 	// a)  memory footprint
@@ -113,14 +113,14 @@ func resolveDependencies(pkg *NpmPackageVersion, versionConstraint string) error
 }
 
 func highestCompatibleVersion(constraintStr string, versions *npmPackageMetaResponse) (string, error) {
-	// comment: this check might become obsolete once the validation of the passed in semver happens upfront,
+	// review: this check might become obsolete once the validation of the passed in semver happens upfront,
 	// could we potentially remove this ?
 	constraint, err := semver.NewConstraint(constraintStr)
 	if err != nil {
 		return "", err
 	}
 	filtered := filterCompatibleVersions(constraint, versions)
-	// comment: could we remove the need for sorting here, if the above line returns the max version ?
+	// review: could we remove the need for sorting here, if the above line returns the max version ?
 	sort.Sort(filtered)
 	if len(filtered) == 0 {
 		return "", errors.New("no compatible versions found")
@@ -129,7 +129,7 @@ func highestCompatibleVersion(constraintStr string, versions *npmPackageMetaResp
 }
 
 func filterCompatibleVersions(constraint *semver.Constraints, pkgMeta *npmPackageMetaResponse) semver.Collection {
-	// comment: should we consider sending a single concrete version back from this function ?
+	// review: should we consider sending a single concrete version back from this function ?
 	// we could keep track of the max version here as we loop through all the versions
 	// with something like semVer.GreaterThanEqualTo(maxVersion)
 	var compatible semver.Collection
@@ -146,7 +146,7 @@ func filterCompatibleVersions(constraint *semver.Constraints, pkgMeta *npmPackag
 }
 
 func fetchPackage(name, version string) (*npmPackageResponse, error) {
-	// comment: should we consider creating a custom http client, to manage transport level properties
+	// review: should we consider creating a custom http client, to manage transport level properties
 	// for concurrency etc.. ?
 	resp, err := http.Get(fmt.Sprintf("https://registry.npmjs.org/%s/%s", name, version))
 	if err != nil {
@@ -154,20 +154,20 @@ func fetchPackage(name, version string) (*npmPackageResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	// comment: should we check status here and return err if not found ?
+	// review: should we check status here and return err if not found ?
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	var parsed npmPackageResponse
-	// comment: should check the error and return the error instead ?
+	// review: should check the error and return the error instead ?
 	_ = json.Unmarshal(body, &parsed)
 	return &parsed, nil
 }
 
 func fetchPackageMeta(p string) (*npmPackageMetaResponse, error) {
-	// comment: should we consider creating a custom http client, to manage transport level properties
+	// review: should we consider creating a custom http client, to manage transport level properties
 	// for concurrency etc.. ?
 	resp, err := http.Get(fmt.Sprintf("https://registry.npmjs.org/%s", p))
 	if err != nil {
