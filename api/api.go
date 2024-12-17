@@ -47,7 +47,7 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 	//		return "", err
 	//	}
 
-	// minor: I wonder if we should explore the possibility of the recursive function not needing to
+	// minor comment: I wonder if we should explore the possibility of the recursive function not needing to
 	// mutate a passed in object, (ie don't pass in &NpmPackageVersion but instead make it return it)
 	// imo it would be cleaner and prevent any accidental mutations ?
 	rootPkg := &NpmPackageVersion{Name: pkgName, Dependencies: map[string]*NpmPackageVersion{}}
@@ -72,15 +72,14 @@ func packageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Ignoring ResponseWriter errors
 	// comment: should we consider logging the error for observability ?
+	// also if there is an error should we return a non 2xx ?
 	_, _ = w.Write(stringified)
 }
 
 func resolveDependencies(pkg *NpmPackageVersion, versionConstraint string) error {
-	// comment: I wonder if it would be possible to skip the package meta call all together
-	// once the request package version has been validated successfully at the start
-	// can we just try getting the package directly (ie: npmPkg, err := fetchPackage(pkg.Name, pkg.Version)
-	// if we are unable to find the package at this point we can return 404 to the clients ?
-	// the advantage would be it would save us from making an additional external call to npm.
+	// comment: should we abstract away the retrieval of the highest compatible version into another
+	// function, it would reduce the cognitive load when trying to figure out what this function is
+	// doing ?
 	pkgMeta, err := fetchPackageMeta(pkg.Name)
 	if err != nil {
 		return err
@@ -114,12 +113,14 @@ func resolveDependencies(pkg *NpmPackageVersion, versionConstraint string) error
 }
 
 func highestCompatibleVersion(constraintStr string, versions *npmPackageMetaResponse) (string, error) {
+	// comment: this check might become obsolete once the validation of the passed in semver happens upfront,
+	// could we potentially remove this ?
 	constraint, err := semver.NewConstraint(constraintStr)
 	if err != nil {
 		return "", err
 	}
 	filtered := filterCompatibleVersions(constraint, versions)
-	// comment: if the above line returns the max version no need to sort anymore
+	// comment: could we remove the need for sorting here, if the above line returns the max version ?
 	sort.Sort(filtered)
 	if len(filtered) == 0 {
 		return "", errors.New("no compatible versions found")
@@ -128,7 +129,9 @@ func highestCompatibleVersion(constraintStr string, versions *npmPackageMetaResp
 }
 
 func filterCompatibleVersions(constraint *semver.Constraints, pkgMeta *npmPackageMetaResponse) semver.Collection {
-	// comment: consider sending a single max version instead of collection
+	// comment: should we consider sending a single concrete version back from this function ?
+	// we could keep track of the max version here as we loop through all the versions
+	// with something like semVer.GreaterThanEqualTo(maxVersion)
 	var compatible semver.Collection
 	for version := range pkgMeta.Versions {
 		semVer, err := semver.NewVersion(version)
@@ -143,6 +146,8 @@ func filterCompatibleVersions(constraint *semver.Constraints, pkgMeta *npmPackag
 }
 
 func fetchPackage(name, version string) (*npmPackageResponse, error) {
+	// comment: should we consider creating a custom http client, to manage transport level properties
+	// for concurrency etc.. ?
 	resp, err := http.Get(fmt.Sprintf("https://registry.npmjs.org/%s/%s", name, version))
 	if err != nil {
 		return nil, err
@@ -162,6 +167,8 @@ func fetchPackage(name, version string) (*npmPackageResponse, error) {
 }
 
 func fetchPackageMeta(p string) (*npmPackageMetaResponse, error) {
+	// comment: should we consider creating a custom http client, to manage transport level properties
+	// for concurrency etc.. ?
 	resp, err := http.Get(fmt.Sprintf("https://registry.npmjs.org/%s", p))
 	if err != nil {
 		return nil, err
@@ -188,7 +195,7 @@ func fetchPackageMeta(p string) (*npmPackageMetaResponse, error) {
 //                     pros: a) can easily test the recursive function w/o any external dependency.
 //							 b) can re-use the same service logic for different client interfaces eg: grpc
 //							 c) would be easier re-use the service logic for other non-npm registries
-//   - adaptor layer - would be responsible for interacting with external npm API's
+//   - client layer - would be responsible for interacting with external npm API's
 // 						a) abstract away the integration detail specific to on registry in a single place
 // the current file - would be responsible for request/response validation and interfacing with clients
 
