@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"encoding/json"
+	"github.com/snyk/snyk-code-review-exercise/internal/models"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -20,29 +21,44 @@ import (
 
 // consider adding tests for other validation scenarios, eg: incorrect input version, unknown package name and version
 func TestPackageHandler(t *testing.T) {
-	handler := api.New()
-	server := httptest.NewServer(handler)
-	defer server.Close()
+	t.Run("success", func(t *testing.T) {
+		handler := api.New()
+		server := httptest.NewServer(handler)
+		defer server.Close()
 
-	resp, err := server.Client().Get(server.URL + "/package/react/16.13.0")
-	require.Nil(t, err)
-	defer resp.Body.Close()
+		resp, err := server.Client().Get(server.URL + "/package/react/16.13.0")
+		require.Nil(t, err)
+		defer resp.Body.Close()
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	body, err := io.ReadAll(resp.Body)
-	require.Nil(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		body, err := io.ReadAll(resp.Body)
+		require.Nil(t, err)
 
-	var data api.NpmPackageVersion
-	err = json.Unmarshal(body, &data)
-	require.Nil(t, err)
+		var data models.PackageVersion
+		err = json.Unmarshal(body, &data)
+		require.Nil(t, err)
 
-	assert.Equal(t, "react", data.Name)
-	assert.Equal(t, "16.13.0", data.Version)
+		assert.Equal(t, "react", data.Name)
+		assert.Equal(t, "16.13.0", data.Version)
 
-	fixture, err := os.Open(filepath.Join("testdata", "react-16.13.0.json"))
-	require.Nil(t, err)
-	var fixtureObj api.NpmPackageVersion
-	require.Nil(t, json.NewDecoder(fixture).Decode(&fixtureObj))
+		fixture, err := os.Open(filepath.Join("testdata", "react-16.13.0.json"))
+		require.Nil(t, err)
+		var fixtureObj models.PackageVersion
+		require.Nil(t, json.NewDecoder(fixture).Decode(&fixtureObj))
 
-	assert.Equal(t, fixtureObj, data)
+		assert.Equal(t, fixtureObj, data)
+	})
+
+	t.Run("incorrect package", func(t *testing.T) {
+		handler := api.New()
+		server := httptest.NewServer(handler)
+		defer server.Close()
+
+		resp, err := server.Client().Get(server.URL + "/package/unknown/16.13.0")
+		require.Nil(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+
 }

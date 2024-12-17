@@ -1,7 +1,7 @@
 package models
 
 type PackageVersion struct {
-	Name         string
-	Version      string
-	Dependencies map[string]*PackageVersion
+	Name         string                     `json:"name"`
+	Version      string                     `json:"version"`
+	Dependencies map[string]*PackageVersion `json:"dependencies"`
 }
