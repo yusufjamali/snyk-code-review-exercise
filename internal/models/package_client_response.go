@@ -5,3 +5,7 @@ type PackageClientResponse struct {
 	Version      string            `json:"version"`
 	Dependencies map[string]string `json:"dependencies"`
 }
+
+type PackageClientMetaResponse struct {
+	Versions map[string]PackageClientResponse `json:"versions"`
+}
